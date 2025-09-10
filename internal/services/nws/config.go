@@ -1,6 +1,9 @@
 package nws
 
 const (
+	TestCoordsLat  = 35
+	TestCoordsLong = -78
+
 	GridpointURLParams = "%s/%d,%d"
 	NWSBaseURL         = "https://api.weather.gov"
 	PointsURL          = "/points/%s,%s"

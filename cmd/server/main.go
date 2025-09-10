@@ -15,7 +15,7 @@ import (
 )
 
 func Run() {
-	cfg := config.Load()
+	cfg := config.Get()
 	// db := database.Connect(cfg.DatabaseURL)
 	// defer db.Close()
 
@@ -46,7 +46,12 @@ func Run() {
 }
 
 func setupRoutes(mux *http.ServeMux, h *routes.Handler) {
-	// mux.HandleFunc("GET /health", h.Health)
-	// mux.HandleFunc("POST /users", h.CreateUser)
-	// mux.HandleFunc("GET /users/{id}", h.GetUser)
+	// mapbox endpoints
+	mux.HandleFunc("POST /geocode/place", h.GeocodePlace)
+
+	// nws endpoints
+	mux.HandleFunc("POST /weather", h.TestForecast)
+	mux.HandleFunc("POST /weather/gridpoints", h.TestGridpoints)
+	mux.HandleFunc("POST /weather/forecast", h.GetForecast)
+	mux.HandleFunc("POST /weather/forecast/hourly", h.GetHourlyForecast)
 }

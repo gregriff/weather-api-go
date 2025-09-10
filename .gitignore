@@ -1,5 +1,6 @@
 Binaries for programs and plugins
-gpt-cli-go
+weather-api-go
+weather-api
 *.exe
 *.exe~
 *.dll
@@ -46,6 +47,7 @@ go.work
 .env
 .env.local
 .env.*.local
+*.env.json
 
  # Log files
 *.log
