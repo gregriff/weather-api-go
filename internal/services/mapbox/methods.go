@@ -1,9 +1,11 @@
+// helper functions to Mapbox endpoint functions
 package mapbox
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gregriff/weather-api-go/internal/config"
@@ -19,17 +21,20 @@ func ForwardGeocode(mapbox http.Client, searchText string, latitude, longitude *
 	}
 	res, err := mapbox.Get(url)
 	if err != nil {
-		httpErr = errors.New("Request failed")
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		httpErr = errors.New("Request returned non-200 status")
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-		httpErr = errors.New("Json parse failed")
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	return

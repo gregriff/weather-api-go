@@ -1,20 +1,24 @@
+// helper functions to NWS endpoint functions
 package nws
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gregriff/weather-api-go/internal/v1/schemas"
 )
 
 // GetGridpointsRaw expects string lat and long returned by FormatCoordinates
-func GetGridpointsRaw(nws http.Client, latitude, longitude string) (data PointsResponse, httpErr error) {
+func GetGridpointsRaw(nws *http.Client, latitude, longitude string) (data PointsResponse, httpErr error) {
 	url := fmt.Sprintf(PointsURL, latitude, longitude)
 	res, err := nws.Get(url)
 	if err != nil {
-		httpErr = errors.New("Request failed")
+		log.Printf("res: %#v", res)
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	defer res.Body.Close()
@@ -22,24 +26,28 @@ func GetGridpointsRaw(nws http.Client, latitude, longitude string) (data PointsR
 	if statusCode := res.StatusCode; statusCode != http.StatusOK {
 		if statusCode == 400 {
 			httpErr = errors.New("GET /gridpoints failed with 400")
+			log.Printf("ERROR: %v", httpErr)
 			return
 		}
 		httpErr = errors.New("GET /gridpoints returned non-200 status")
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 
 	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
 		httpErr = errors.New("Json parse failed")
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	return
 }
 
 // GetGridpoints expects string lat and long returned by FormatCoordinates
-func GetGridpoints(nws http.Client, latitude, longitude string) (data *schemas.Gridpoints, httpErr error) {
+func GetGridpoints(nws *http.Client, latitude, longitude string) (data *schemas.Gridpoints, httpErr error) {
 	res, err := GetGridpointsRaw(nws, latitude, longitude)
 	if err != nil {
-		httpErr = errors.New("GET GRIDPOINTS RAW failed")
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	gridpointProps := res.Properties
@@ -56,10 +64,11 @@ func GetGridpoints(nws http.Client, latitude, longitude string) (data *schemas.G
 }
 
 // GetForecastRaw expects string lat and long returned by FormatCoordinates
-func GetForecastRaw(nws http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.ForecastResponse, httpErr error) {
+func GetForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.ForecastResponse, httpErr error) {
 	if gridpoints == nil {
 		gridpoints, httpErr = GetGridpoints(nws, latitude, longitude)
 		if httpErr != nil {
+			log.Printf("ERROR: %v", httpErr)
 			return
 		}
 	}
@@ -68,18 +77,21 @@ func GetForecastRaw(nws http.Client, latitude, longitude string, gridpoints *sch
 	url := fmt.Sprintf(ForecastURL, urlParams)
 	res, err := nws.Get(url)
 	if err != nil {
-		httpErr = errors.New("GET FORECAST RAW failed")
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		httpErr = errors.New("Request returned non-200 status")
+		httpErr = fmt.Errorf("Request returned non-200 status: %s", res.Status)
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 
 	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-		httpErr = errors.New("Json parse failed")
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 
@@ -93,10 +105,11 @@ func GetForecastRaw(nws http.Client, latitude, longitude string, gridpoints *sch
 	return
 }
 
-func GetHourlyForecastRaw(nws http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.HourlyForecastResponse, httpErr error) {
+func GetHourlyForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.HourlyForecastResponse, httpErr error) {
 	if gridpoints == nil {
 		gridpoints, httpErr = GetGridpoints(nws, latitude, longitude)
 		if httpErr != nil {
+			log.Printf("ERROR: %v", httpErr)
 			return
 		}
 	}
@@ -105,18 +118,21 @@ func GetHourlyForecastRaw(nws http.Client, latitude, longitude string, gridpoint
 	url := fmt.Sprintf(HourlyForecastURL, urlParams)
 	res, err := nws.Get(url)
 	if err != nil {
-		httpErr = errors.New("GET HOURLY FORECAST RAW failed")
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		httpErr = errors.New("Request returned non-200 status")
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 
 	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-		httpErr = errors.New("Json parse failed")
+		httpErr = err
+		log.Printf("ERROR: %v", httpErr)
 		return
 	}
 

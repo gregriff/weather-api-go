@@ -7,22 +7,6 @@ import (
 	"sync"
 )
 
-type MapboxConfig struct {
-	PublicToken string `json:"public_token"`
-}
-
-type NWSConfig struct {
-	TestLat  int `json:"test_lat"`
-	TestLong int `json:"test_long"`
-}
-
-type Config struct {
-	Port string `json:"port"`
-
-	Mapbox MapboxConfig `json:"mapbox"`
-	NWS    NWSConfig    `json:"nws"`
-}
-
 var (
 	instance *Config
 	once     sync.Once
@@ -38,7 +22,12 @@ func Get() *Config {
 
 // load reads and parses the config file
 func load() *Config {
-	configFile := getConfigFilePath("dev.env.json")
+	var configFile string
+	if configPath := os.Getenv("CONFIG_PATH"); configPath != "" {
+		configFile = configPath
+	} else {
+		configFile = "dev.env.json"
+	}
 
 	file, err := os.Open(configFile)
 	if err != nil {
@@ -53,12 +42,4 @@ func load() *Config {
 	}
 
 	return &config
-}
-
-// getConfigFilePath determines the config file location
-func getConfigFilePath(defaultPath string) string {
-	if configPath := os.Getenv("CONFIG_PATH"); configPath != "" {
-		return configPath
-	}
-	return defaultPath
 }

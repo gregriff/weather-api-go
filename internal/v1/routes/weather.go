@@ -12,7 +12,7 @@ import (
 func (h *Handler) TestForecast(w http.ResponseWriter, r *http.Request) {
 	cfg := config.Get()
 	lat, long := nws.FormatCoordinates(cfg.NWS.TestLat, cfg.NWS.TestLong)
-	res, err := nws.GetForecastRaw(*h.NWSClient, lat, long, nil)
+	res, err := nws.GetForecastRaw(h.NWSClient, lat, long, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -23,7 +23,7 @@ func (h *Handler) TestForecast(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) TestGridpoints(w http.ResponseWriter, r *http.Request) {
 	cfg := config.Get()
 	lat, long := nws.FormatCoordinates(cfg.NWS.TestLat, cfg.NWS.TestLong)
-	res, err := nws.GetGridpointsRaw(*h.NWSClient, lat, long)
+	res, err := nws.GetGridpointsRaw(h.NWSClient, lat, long)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -38,7 +38,7 @@ func (h *Handler) GetForecast(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	lat, long := nws.FormatCoordinates(query.Latitude, query.Longitude)
-	res, err := nws.GetForecastRaw(*h.NWSClient, lat, long, &query.Gridpoints)
+	res, err := nws.GetForecastRaw(h.NWSClient, lat, long, &query.Gridpoints)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -53,7 +53,7 @@ func (h *Handler) GetHourlyForecast(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	lat, long := nws.FormatCoordinates(query.Latitude, query.Longitude)
-	res, err := nws.GetHourlyForecastRaw(*h.NWSClient, lat, long, &query.Gridpoints)
+	res, err := nws.GetHourlyForecastRaw(h.NWSClient, lat, long, &query.Gridpoints)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

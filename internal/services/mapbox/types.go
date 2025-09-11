@@ -1,4 +1,4 @@
-// for static type inference of Mapbox API Response objects
+// Mapbox API Response types
 package mapbox
 
 type Geometry struct {
