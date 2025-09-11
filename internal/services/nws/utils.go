@@ -1,3 +1,4 @@
+// more lower-level (not operating on requests or responses) helpers to NWS endpoint functions
 package nws
 
 import (

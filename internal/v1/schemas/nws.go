@@ -2,87 +2,87 @@
 package schemas
 
 type Gridpoints struct {
-	Office string `validate:"required"`
-	x      int    `validate:"required"`
-	y      int    `validate:"required"`
+	Office string `json:"office" validate:"required"`
+	X      int    `json:"x" validate:"required"`
+	Y      int    `json:"y" validate:"required"`
 
 	// if user provides gridpoints when requesting a forecast, they already have this data
-	City  string `validate:"required"`
-	State string `validate:"required"`
+	City  string `json:"city" validate:"required"`
+	State string `json:"state" validate:"required"`
 }
 
 type LocationData struct {
-	Latitude   float64    `validate:"required"`
-	Longitude  float64    `validate:"required"`
-	Gridpoints Gridpoints `validate:"required"`
+	Latitude   float64    `json:"latitude" validate:"required"`
+	Longitude  float64    `json:"longitude" validate:"required"`
+	Gridpoints Gridpoints `json:"gridpoints" validate:"required"`
 }
 
 // Responses ####################################################
 
 type PrecipitationValue struct {
-	Value    any // can be float, int, string, or nil
-	UnitCode any
+	Value    any `json:"value"` // can be float, int, string, or nil
+	UnitCode any `json:"unitCode"`
 }
 
 type ForecastPeriod struct {
-	Number                     int                `validate:"required"`
-	Name                       string             `validate:"required"`
-	StartTime                  string             `validate:"required"`
-	EndTime                    string             `validate:"required"`
-	IsDaytime                  bool               `validate:"required"`
-	Temperature                int                `validate:"required"`
-	TemperatureUnit            string             `validate:"required"`
-	TemperatureTrend           string             `validate:"required"`
-	ProbabilityOfPrecipitation PrecipitationValue `validate:"required"`
-	WindSpeed                  string             `validate:"required"`
-	WindDirection              string             `validate:"required"`
-	ShortForecast              string             `validate:"required"`
-	DetailedForecast           string             `validate:"required"`
-	Icon                       string             `validate:"required"`
-	IconName                   string             `validate:"required"`
+	Number                     int                `json:"number" validate:"required"`
+	Name                       string             `json:"name" validate:"required"`
+	StartTime                  string             `json:"startTime" validate:"required"`
+	EndTime                    string             `json:"endTime" validate:"required"`
+	IsDaytime                  bool               `json:"isDaytime" validate:"required"`
+	Temperature                int                `json:"temperature" validate:"required"`
+	TemperatureUnit            string             `json:"temperatureUnit" validate:"required"`
+	TemperatureTrend           string             `json:"temperatureTrend" validate:"required"`
+	ProbabilityOfPrecipitation PrecipitationValue `json:"probabilityOfPrecipitation" validate:"required"`
+	WindSpeed                  string             `json:"windSpeed" validate:"required"`
+	WindDirection              string             `json:"windDirection" validate:"required"`
+	ShortForecast              string             `json:"shortForecast" validate:"required"`
+	DetailedForecast           string             `json:"detailedForecast" validate:"required"`
+	Icon                       string             `json:"icon" validate:"required"`
+	IconName                   string             `json:"iconName" validate:"required"`
 }
 
 type ForecastProperties struct {
-	GeneratedAt string           `validate:"required"`
-	UpdateTime  string           `validate:"required"`
-	Periods     []ForecastPeriod `validate:"required"`
+	GeneratedAt string           `json:"generatedAt" validate:"required"`
+	UpdateTime  string           `json:"updateTime" validate:"required"`
+	Periods     []ForecastPeriod `json:"periods" validate:"required"`
 }
 
 type ForecastResponse struct {
-	Properties ForecastProperties `validate:"required"`
-	Gridpoints Gridpoints         `validate:"required"`
+	Properties ForecastProperties `json:"properties" validate:"required"`
+	Gridpoints Gridpoints         `json:"gridpoints" validate:"required"`
 }
 
 type HourlyForecastPrecipitationObject struct {
-	Value    any `validate:"required"` // can be int, float, or nil
-	MaxValue *int
-	MinValue *int
-	UnitCode string `validate:"required"`
+	Value    any    `json:"value" validate:"required"` // can be int, float, or nil
+	MaxValue *int   `json:"maxValue"`
+	MinValue *int   `json:"minValue"`
+	UnitCode string `json:"unitCode" validate:"required"`
 }
 
 type HourlyForecastPeriod struct {
-	Number                     int                               `validate:"required"`
-	Name                       string                            `validate:"required"`
-	StartTime                  string                            `validate:"required"`
-	EndTime                    string                            `validate:"required"`
-	IsDaytime                  bool                              `validate:"required"`
-	TemperatureTrend           string                            `validate:"required"`
-	ProbabilityOfPrecipitation HourlyForecastPrecipitationObject `validate:"required"`
-	Dewpoint                   HourlyForecastPrecipitationObject `validate:"required"`
-	RelativeHumidity           HourlyForecastPrecipitationObject `validate:"required"`
-	WindDirection              string                            `validate:"required"`
-	ShortForecast              string                            `validate:"required"`
-	DetailedForecast           string                            `validate:"required"`
-	Icon                       string                            `validate:"required"`
-	IconName                   string                            `validate:"required"`
+	Number                     int                               `json:"number" validate:"required"`
+	Name                       string                            `json:"name" validate:"required"`
+	StartTime                  string                            `json:"startTime" validate:"required"`
+	EndTime                    string                            `json:"endTime" validate:"required"`
+	IsDaytime                  bool                              `json:"isDaytime" validate:"required"`
+	TemperatureTrend           string                            `json:"temperatureTrend" validate:"required"`
+	ProbabilityOfPrecipitation HourlyForecastPrecipitationObject `json:"probabilityOfPrecipitation" validate:"required"`
+	Dewpoint                   HourlyForecastPrecipitationObject `json:"dewpoint" validate:"required"`
+	RelativeHumidity           HourlyForecastPrecipitationObject `json:"relativeHumidity" validate:"required"`
+	WindDirection              string                            `json:"windDirection" validate:"required"`
+	ShortForecast              string                            `json:"shortForecast" validate:"required"`
+	DetailedForecast           string                            `json:"detailedForecast" validate:"required"`
+	Icon                       string                            `json:"icon" validate:"required"`
+	IconName                   string                            `json:"iconName" validate:"required"`
 }
 
 type HourlyForecastProperties struct {
-	GeneratedAt string                 `validate:"required"`
-	UpdateTime  string                 `validate:"required"`
-	Periods     []HourlyForecastPeriod `validate:"required"`
+	GeneratedAt string                 `json:"generatedAt" validate:"required"`
+	UpdateTime  string                 `json:"updateTime" validate:"required"`
+	Periods     []HourlyForecastPeriod `json:"periods" validate:"required"`
 }
 
 type HourlyForecastResponse struct {
-	Properties HourlyForecastProperties `validate:"required"`
+	Properties HourlyForecastProperties `json:"properties" validate:"required"`
 }
