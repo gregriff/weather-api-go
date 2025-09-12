@@ -24,14 +24,17 @@ func Run() {
 	h := routes.NewRouteHandler()
 
 	mux := http.NewServeMux()
-	setupRoutes(mux, h)
+	createRoutes(mux, h)
 
+	// apply middlewares
 	var handler http.Handler
 	if cfg.Debug {
 		handler = middleware.DebugLogging(mux)
 	} else {
 		handler = mux
 	}
+	handler = middleware.NewCORSHandler(handler)
+	handler = middleware.NewCSRFHandler(handler)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Api.Host, cfg.Api.Port),
@@ -53,13 +56,14 @@ func Run() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func setupRoutes(mux *http.ServeMux, h *routes.Handler) {
+// createRoutes creates the routing rules for the webserver
+func createRoutes(mux *http.ServeMux, d *routes.RouteHandler) {
 	// mapbox endpoints
-	mux.HandleFunc("POST /v1/geocode/place", h.GeocodePlace)
+	mux.HandleFunc("POST /v1/geocode/place", d.GeocodePlace)
 
 	// nws endpoints
-	mux.HandleFunc("GET /v1/weather", h.TestForecast)
-	mux.HandleFunc("GET /v1/weather/gridpoints", h.TestGridpoints)
-	mux.HandleFunc("POST /v1/weather/forecast", h.GetForecast)
-	mux.HandleFunc("POST /v1/weather/forecast/hourly", h.GetHourlyForecast)
+	mux.HandleFunc("GET /v1/weather", d.TestForecast)
+	mux.HandleFunc("GET /v1/weather/gridpoints", d.TestGridpoints)
+	mux.HandleFunc("POST /v1/weather/forecast", d.GetForecast)
+	mux.HandleFunc("POST /v1/weather/forecast/hourly", d.GetHourlyForecast)
 }

@@ -65,7 +65,7 @@ func GetGridpoints(nws *http.Client, latitude, longitude string) (data *schemas.
 
 // GetForecastRaw expects string lat and long returned by FormatCoordinates
 func GetForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.ForecastResponse, httpErr error) {
-	if gridpoints == nil {
+	if gridpoints == nil || gridpoints.IsEmpty() {
 		gridpoints, httpErr = GetGridpoints(nws, latitude, longitude)
 		if httpErr != nil {
 			log.Printf("ERROR: %v", httpErr)
@@ -106,7 +106,7 @@ func GetForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *sc
 }
 
 func GetHourlyForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.HourlyForecastResponse, httpErr error) {
-	if gridpoints == nil {
+	if gridpoints == nil || gridpoints.IsEmpty() {
 		gridpoints, httpErr = GetGridpoints(nws, latitude, longitude)
 		if httpErr != nil {
 			log.Printf("ERROR: %v", httpErr)

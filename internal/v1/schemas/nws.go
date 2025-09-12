@@ -11,6 +11,13 @@ type Gridpoints struct {
 	State string `json:"state" validate:"required"`
 }
 
+func (g *Gridpoints) IsEmpty() bool {
+	if g.X == 0 && g.Y == 0 && g.Office == "" && g.City == "" && g.State == "" {
+		return true
+	}
+	return false
+}
+
 type LocationData struct {
 	Latitude   float64    `json:"latitude" validate:"required"`
 	Longitude  float64    `json:"longitude" validate:"required"`
