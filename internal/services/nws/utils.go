@@ -56,12 +56,14 @@ func SetIconNames(periods any) any {
 			periods[idx].IconName = getIconName(period.Icon)
 		}
 	}
+	// log.Println("seticonnames.periods POST: ", periods)
 	return periods
 }
 
 // getIconName turns a NWS icon string into one that the frontend looks for when it decides what to render
 func getIconName(icon string) (newIconName string) {
-	iconPrefix := strings.Split(icon, "/")[1]
+	parts := strings.Split(icon, "/")
+	iconPrefix := parts[len(parts)-1]
 	newIconName = strings.Split(iconPrefix, ",")[0]
 
 	if strings.Contains(newIconName, "?") {

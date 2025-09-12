@@ -16,8 +16,7 @@ func ForwardGeocode(mapbox http.Client, searchText string, latitude, longitude *
 	url := fmt.Sprintf(ForwardGeocodeURL, searchText, cfg.Mapbox.PublicToken)
 
 	if latitude != nil && longitude != nil {
-		fmt.Println("FORWARD GEOCODE: lat: ", *latitude, "long: ", *longitude)
-		url += fmt.Sprintf("&proximity=%d%%2C%d", longitude, latitude)
+		url += fmt.Sprintf("&proximity=%f%%2C%f", *longitude, *latitude)
 	}
 	res, err := mapbox.Get(url)
 	if err != nil {

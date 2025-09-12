@@ -38,6 +38,7 @@ func (h *RouteHandler) GetForecast(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	lat, long := nws.FormatCoordinates(query.Latitude, query.Longitude)
+
 	res, err := nws.GetForecastRaw(h.NWSClient, lat, long, &query.Gridpoints)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
