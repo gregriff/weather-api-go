@@ -1,8 +1,10 @@
+// defines the shape of the webserver's configuration. No validation is done.
 package config
 
 type APIConfig struct {
-	Host string `json:"host"`
-	Port int    `json:"port"`
+	Host           string   `json:"host"`
+	Port           int      `json:"port"`
+	AllowedOrigins []string `json:"allowed_origins"`
 }
 
 type MapboxConfig struct {

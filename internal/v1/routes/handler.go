@@ -7,8 +7,8 @@ import (
 	"github.com/gregriff/weather-api-go/internal/services/nws"
 )
 
-// Handler provides the dependencies for any endpoint, and is the reciever of the endpoint handling functions
-type Handler struct {
+// RouteHandler provides the dependencies for any endpoint, and is the reciever of the endpoint handling functions
+type RouteHandler struct {
 	// db        *sql.DB
 	// validator *validators.RequestValidator
 
@@ -19,8 +19,9 @@ type Handler struct {
 	NWSClient *http.Client
 }
 
-func NewRouteHandler() *Handler {
-	return &Handler{
+// NewRouteHandler creates the reciever for all endpoint handling functions
+func NewRouteHandler() *RouteHandler {
+	return &RouteHandler{
 		// db:        db,  (*sql.DB)
 		// validator: validators.New(),
 		MapboxClient: mapbox.NewMapboxClient(),

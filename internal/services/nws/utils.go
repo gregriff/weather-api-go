@@ -15,6 +15,8 @@ func FormatCoordinates(latitude, longitude any) (lat, long string) {
 	return
 }
 
+// formatCoordinate performs rounding and type-conversion from a numerical coordinate,
+// turning it into a string compatible with the NWS API
 func formatCoordinate(coord any) (formatted string) {
 	var f float64
 
