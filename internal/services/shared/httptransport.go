@@ -1,4 +1,4 @@
-// httptransport.go allows custom attributes to be added to each HTTP request sent by an http.Client that uses this transport
+// package shared provides structs and configurations shared between the http.Client's used for the mapbox and nws services of this API.
 package shared
 
 import (
@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Transport allows custom attributes to be added to each HTTP request sent by an http.Client that uses this transport
 type Transport struct {
 	BaseURL string
 	Headers map[string]string
