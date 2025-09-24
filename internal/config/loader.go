@@ -33,7 +33,9 @@ func load() *Config {
 	if err != nil {
 		log.Fatalf("Failed to open config file %s: %v", configFile, err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	var config Config
 	decoder := json.NewDecoder(file)

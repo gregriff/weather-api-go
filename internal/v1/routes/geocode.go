@@ -2,6 +2,8 @@ package routes
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gregriff/weather-api-go/internal/services/mapbox"
@@ -17,6 +19,7 @@ func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 
 	mapboxRes, err := mapbox.ForwardGeocode(*h.MapboxClient, query.SearchText, query.Latitude, query.Longitude)
 	if err != nil {
+		log.Println(fmt.Errorf("forwardGeocode Error: %w", err).Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

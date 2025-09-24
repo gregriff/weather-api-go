@@ -3,7 +3,6 @@ package shared
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -17,7 +16,8 @@ type Transport struct {
 // RoundTrip adds upon the normal http.Transport.RoundTrip() behavior to add headers and a base url to each request.
 // Reference: https://cs.opensource.google/go/x/oauth2/+/refs/tags/v0.31.0:transport.go
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if url := req.URL.String(); !strings.HasPrefix(url, "http") {
+	url := req.URL.String()
+	if !strings.HasPrefix(url, "http") {
 		baseURL := strings.TrimSuffix(t.BaseURL, "/")
 		path := "/" + strings.TrimPrefix(url, "/")
 		newURL, err := req.URL.Parse(baseURL + path)
@@ -30,6 +30,5 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	for k, v := range t.Headers {
 		req.Header.Add(k, v)
 	}
-	log.Printf("External request made to: %s", req.URL.String())
 	return http.DefaultTransport.RoundTrip(req)
 }

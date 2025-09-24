@@ -62,8 +62,6 @@ func createRoutes(mux *http.ServeMux, d *routes.RouteHandler) {
 	mux.HandleFunc("POST /v1/geocode/place", d.GeocodePlace)
 
 	// nws endpoints
-	mux.HandleFunc("GET /v1/weather", d.TestForecast)
-	mux.HandleFunc("GET /v1/weather/gridpoints", d.TestGridpoints)
 	mux.HandleFunc("POST /v1/weather/forecast", d.GetForecast)
 	mux.HandleFunc("POST /v1/weather/forecast/hourly", d.GetHourlyForecast)
 }
