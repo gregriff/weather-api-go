@@ -19,7 +19,7 @@ func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 
 	mapboxRes, err := mapbox.ForwardGeocode(*h.MapboxClient, query.SearchText, query.Latitude, query.Longitude)
 	if err != nil {
-		log.Println(fmt.Errorf("forwardGeocode Error: %w", err).Error())
+		log.Println(fmt.Errorf("GeocodePlace Error: %w", err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
