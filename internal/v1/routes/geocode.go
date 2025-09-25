@@ -17,7 +17,7 @@ func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mapboxRes, err := mapbox.ForwardGeocode(*h.MapboxClient, query.SearchText, query.Latitude, query.Longitude)
+	res, err := mapbox.ForwardGeocode(*h.MapboxClient, query.SearchText, query.Latitude, query.Longitude)
 	if err != nil {
 		log.Println(fmt.Errorf("GeocodePlace Error: %w", err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -32,7 +32,7 @@ func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 	)
 	results := make(map[string]schemas.PlaceData, 5)
 
-	for _, feature := range mapboxRes.Features {
+	for _, feature := range res.Features {
 		coords = schemas.Coordinates{ // TODO: ensure indexing is correct
 			Longitude: feature.Geometry.Coordinates[0],
 			Latitude:  feature.Geometry.Coordinates[1],

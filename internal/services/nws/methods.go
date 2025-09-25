@@ -60,7 +60,6 @@ func GetForecast(nws *http.Client, latitude, longitude string, gridpoints schema
 	if gridpoints.IsEmpty() {
 		gridpoints, err = GetGridpoints(nws, latitude, longitude)
 		if err != nil {
-			err = fmt.Errorf("gridpoints empty; %w", err)
 			return
 		}
 	}
@@ -100,7 +99,6 @@ func GetHourlyForecast(nws *http.Client, latitude, longitude string, gridpoints 
 	if gridpoints.IsEmpty() {
 		gridpoints, err = GetGridpoints(nws, latitude, longitude)
 		if err != nil {
-			err = fmt.Errorf("gridpoints empty; %w", err)
 			return
 		}
 	}

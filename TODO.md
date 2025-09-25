@@ -1,5 +1,10 @@
 # TODOs
 
+- slog
+- json validation, even on config?
+- graceful shutdown
+- db integration
+
 ### CSRF
 - https://pkg.go.dev/net/http#CrossOriginProtection
 - https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF#defense_summary_checklist

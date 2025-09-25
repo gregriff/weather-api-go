@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -41,19 +42,29 @@ func Run() {
 		Handler: handler,
 	}
 
-	// Graceful shutdown
-	go func() {
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-		<-sigChan
+	// graceful shutdown channel
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		server.Shutdown(ctx)
+	// run server
+	go func() {
+		log.Printf("Starting server on %s", server.Addr)
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("http server error: %v", err)
+		}
+		log.Println("Stopped serving new connections.")
 	}()
 
-	log.Printf("Starting server on %s", server.Addr)
-	log.Fatal(server.ListenAndServe())
+	// recieve stop signals
+	<-sigChan
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("http shutdown error: %v", err)
+	}
+	log.Println("Graceful shutdown complete.")
 }
 
 // createRoutes creates the routing rules for the webserver
