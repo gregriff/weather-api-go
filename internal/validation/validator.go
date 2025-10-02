@@ -3,17 +3,18 @@ package validation
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"reflect"
 	"strings"
 )
 
-// ValidateAndDecode unmarshals JSON and validates struct tags
-func ValidateAndDecode(data []byte, v any) error {
-	if err := json.Unmarshal(data, v); err != nil {
-		return err
+// ValidateAndDecode unmarshals JSON and validates struct tags from a http request body
+func ValidateAndDecode(body io.ReadCloser, obj any) error {
+	if err := json.NewDecoder(body).Decode(obj); err != nil {
+		return fmt.Errorf("json decode error: %w", err)
 	}
-	return Validate(v)
+	return Validate(obj)
 }
 
 // Validate checks struct validate tags

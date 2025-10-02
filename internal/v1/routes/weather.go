@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,12 +12,8 @@ import (
 
 func (h *RouteHandler) GetForecast(w http.ResponseWriter, r *http.Request) {
 	query := schemas.LocationData{}
-	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+	if err := validation.ValidateAndDecode(r.Body, &query); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if vErr := validation.Validate(&query); vErr != nil {
-		http.Error(w, vErr.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -35,12 +30,8 @@ func (h *RouteHandler) GetForecast(w http.ResponseWriter, r *http.Request) {
 
 func (h *RouteHandler) GetHourlyForecast(w http.ResponseWriter, r *http.Request) {
 	query := schemas.LocationData{}
-	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
+	if err := validation.ValidateAndDecode(r.Body, &query); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if vErr := validation.Validate(&query); vErr != nil {
-		http.Error(w, vErr.Error(), http.StatusBadRequest)
 		return
 	}
 
