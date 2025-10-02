@@ -39,7 +39,7 @@ func Run() {
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", cfg.Api.Host, cfg.Api.Port),
-		Handler: handler,
+		Handler: http.TimeoutHandler(handler, 10*time.Second, ""),
 	}
 
 	// graceful shutdown channel

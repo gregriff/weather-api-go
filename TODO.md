@@ -4,6 +4,9 @@
 - json validation, even on config?
 - graceful shutdown
 - db integration
+- a feature that sends multiple concurrent requests
+  - uses errgroup
+  - uses waitgroup
 
 ### CSRF
 - https://pkg.go.dev/net/http#CrossOriginProtection

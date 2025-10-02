@@ -8,12 +8,17 @@ import (
 
 	"github.com/gregriff/weather-api-go/internal/services/mapbox"
 	"github.com/gregriff/weather-api-go/internal/v1/schemas"
+	"github.com/gregriff/weather-api-go/internal/validation"
 )
 
 func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 	query := schemas.GeocodeQueryData{}
 	if err := json.NewDecoder(r.Body).Decode(&query); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if vErr := validation.Validate(&query); vErr != nil {
+		http.Error(w, vErr.Error(), http.StatusBadRequest)
 		return
 	}
 
