@@ -3,8 +3,8 @@ package schemas
 
 type Gridpoints struct {
 	Office string `json:"office" validate:"required"`
-	X      int    `json:"x" validate:"required"`
-	Y      int    `json:"y" validate:"required"`
+	X      *int   `json:"x" validate:"required"`
+	Y      *int   `json:"y" validate:"required"`
 
 	// if user provides gridpoints when requesting a forecast, they already have this data
 	City  string `json:"city" validate:"required"`
@@ -12,22 +12,22 @@ type Gridpoints struct {
 }
 
 func (g *Gridpoints) IsEmpty() bool {
-	if g.X == 0 && g.Y == 0 && g.Office == "" && g.City == "" && g.State == "" {
+	if g.X == nil && g.Y == nil && g.Office == "" && g.City == "" && g.State == "" {
 		return true
 	}
 	return false
 }
 
 type LocationData struct {
-	Latitude   float64    `json:"latitude" validate:"required"`
-	Longitude  float64    `json:"longitude" validate:"required"`
-	Gridpoints Gridpoints `json:"gridpoints"`
+	Latitude   float64     `json:"latitude" validate:"required"`
+	Longitude  float64     `json:"longitude" validate:"required"`
+	Gridpoints *Gridpoints `json:"gridpoints"`
 }
 
 // Responses ####################################################
 
 type PrecipitationValue struct {
-	Value    any `json:"value"` // can be float, int, string, or nil
+	Value    any `json:"value"` // can be float, int, string, or nil?
 	UnitCode any `json:"unitCode"`
 }
 
@@ -36,8 +36,8 @@ type ForecastPeriod struct {
 	Name                       string             `json:"name" validate:"required"`
 	StartTime                  string             `json:"startTime" validate:"required"`
 	EndTime                    string             `json:"endTime" validate:"required"`
-	IsDaytime                  bool               `json:"isDaytime" validate:"required"`
-	Temperature                int                `json:"temperature" validate:"required"`
+	IsDaytime                  *bool              `json:"isDaytime" validate:"required"`
+	Temperature                *int               `json:"temperature" validate:"required"`
 	TemperatureUnit            string             `json:"temperatureUnit" validate:"required"`
 	TemperatureTrend           string             `json:"temperatureTrend" validate:"required"`
 	ProbabilityOfPrecipitation PrecipitationValue `json:"probabilityOfPrecipitation" validate:"required"`
@@ -72,7 +72,7 @@ type HourlyForecastPeriod struct {
 	Name                       string                            `json:"name" validate:"required"`
 	StartTime                  string                            `json:"startTime" validate:"required"`
 	EndTime                    string                            `json:"endTime" validate:"required"`
-	IsDaytime                  bool                              `json:"isDaytime" validate:"required"`
+	IsDaytime                  *bool                             `json:"isDaytime" validate:"required"`
 	TemperatureTrend           string                            `json:"temperatureTrend" validate:"required"`
 	ProbabilityOfPrecipitation HourlyForecastPrecipitationObject `json:"probabilityOfPrecipitation" validate:"required"`
 	Dewpoint                   HourlyForecastPrecipitationObject `json:"dewpoint" validate:"required"`

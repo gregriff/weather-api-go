@@ -19,7 +19,10 @@ func (h *RouteHandler) GetForecast(w http.ResponseWriter, r *http.Request) {
 
 	lat, long := nws.FormatCoordinates(query.Latitude, query.Longitude)
 
-	res, err := nws.GetForecast(h.NWSClient, lat, long, query.Gridpoints)
+	if query.Gridpoints == nil {
+		query.Gridpoints = &schemas.Gridpoints{}
+	}
+	res, err := nws.GetForecast(h.NWSClient, lat, long, *query.Gridpoints)
 	if err != nil {
 		log.Println(fmt.Errorf("GetForecast Error: %w", err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -35,8 +38,11 @@ func (h *RouteHandler) GetHourlyForecast(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	if query.Gridpoints == nil {
+		query.Gridpoints = &schemas.Gridpoints{}
+	}
 	lat, long := nws.FormatCoordinates(query.Latitude, query.Longitude)
-	res, err := nws.GetHourlyForecast(h.NWSClient, lat, long, query.Gridpoints)
+	res, err := nws.GetHourlyForecast(h.NWSClient, lat, long, *query.Gridpoints)
 	if err != nil {
 		log.Println(fmt.Errorf("GetHourlyForecast Error: %w", err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)

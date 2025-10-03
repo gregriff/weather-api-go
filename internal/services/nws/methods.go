@@ -48,8 +48,8 @@ func GetGridpoints(nws *http.Client, latitude, longitude string) (schemas.Gridpo
 	locationProps := gridpointProps.RelativeLocation.Properties
 
 	data.Office = gridpointProps.Cwa
-	data.X = gridpointProps.GridX
-	data.Y = gridpointProps.GridY
+	data.X = &gridpointProps.GridX
+	data.Y = &gridpointProps.GridY
 	data.City = locationProps.City
 	data.State = locationProps.State
 	return data, nil
@@ -64,7 +64,7 @@ func GetForecast(nws *http.Client, latitude, longitude string, gridpoints schema
 		}
 	}
 
-	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, gridpoints.X, gridpoints.Y)
+	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, *gridpoints.X, *gridpoints.Y)
 	url := fmt.Sprintf(ForecastURL, urlParams)
 	res, httpErr := nws.Get(url)
 	if httpErr != nil {
@@ -103,7 +103,7 @@ func GetHourlyForecast(nws *http.Client, latitude, longitude string, gridpoints 
 		}
 	}
 
-	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, gridpoints.X, gridpoints.Y)
+	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, *gridpoints.X, *gridpoints.Y)
 	url := fmt.Sprintf(HourlyForecastURL, urlParams)
 	res, httpErr := nws.Get(url)
 	if httpErr != nil {

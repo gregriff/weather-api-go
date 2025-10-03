@@ -54,18 +54,32 @@ func validateRule(field reflect.Value, fieldName, rule string) error {
 		if field.IsZero() {
 			return fmt.Errorf("%s is required", fieldName)
 		}
-	case "oneOf":
-		if field.Kind() != reflect.String {
-			return fmt.Errorf("field %s must be a string to use 'oneOf' validator ", fieldName)
-		}
-		options := strings.SplitSeq(rule, ",")
-		for option := range options {
-			if option == field.String() {
-				return nil
-			}
-		}
-		return fmt.Errorf("%s value is not oneOf %v", fieldName, options)
 	default:
+		if strings.HasPrefix(rule, "oneOf") {
+			if !strings.Contains(rule, "=") {
+				return fmt.Errorf("invalid oneOf rule: %s. ensure rule is of the format `oneOf=%%s|%%s...`", rule)
+			}
+			kind := field.Kind()
+			if kind != reflect.Pointer && kind != reflect.String {
+				return fmt.Errorf("invalid oneOf rule: only string fields are supported")
+			}
+			optionPart := strings.Split(rule, "=")[1]
+
+			var value string
+			if kind == reflect.Pointer {
+				value = field.Elem().String()
+			} else {
+				value = field.String()
+			}
+
+			options := strings.SplitSeq(optionPart, "|")
+			for option := range options {
+				if option == value {
+					return nil
+				}
+			}
+			return fmt.Errorf("%s value is not oneOf %v", fieldName, optionPart)
+		}
 		log.Printf("uncaught rule, field: %s, rule: %s", fieldName, rule)
 	}
 	return nil

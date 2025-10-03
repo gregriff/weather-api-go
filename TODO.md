@@ -1,8 +1,11 @@
 # TODOs
 
-- slog
-- json validation, even on config?
-- graceful shutdown
+- slog mode
+- add more timeouts and make them configurable
+- test validators
+- dockerfile
+- keycloak
+- json validation of config?
 - db integration
 - a feature that sends multiple concurrent requests
   - uses errgroup
