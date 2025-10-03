@@ -5,16 +5,29 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"reflect"
 	"strings"
 )
 
-// ValidateAndDecode unmarshals JSON and validates struct tags from a http request body
-func ValidateAndDecode(body io.ReadCloser, obj any) error {
+// DecodeAndValidate unmarshals JSON from body into obj, then validates obj using its struct tags
+func DecodeAndValidate(body io.ReadCloser, obj any) error {
 	if err := json.NewDecoder(body).Decode(obj); err != nil {
 		return fmt.Errorf("json decode error: %w", err)
 	}
 	return Validate(obj)
+}
+
+// ValidateAndEncode validates struct tags and then marshals it into JSON to create a http response body
+func ValidateAndEncode(body http.ResponseWriter, obj any) error {
+	if vErr := Validate(obj); vErr != nil {
+		return vErr
+	}
+
+	if err := json.NewEncoder(body).Encode(obj); err != nil {
+		return fmt.Errorf("json encode error: %w", err)
+	}
+	return nil
 }
 
 // Validate checks struct validate tags
@@ -40,7 +53,7 @@ func Validate(v any) error {
 		rules := strings.SplitSeq(tag, ",")
 		for rule := range rules {
 			if err := validateRule(field, fieldType.Name, rule); err != nil {
-				return err
+				return fmt.Errorf("validation error: %w", err)
 			}
 		}
 	}
@@ -48,7 +61,7 @@ func Validate(v any) error {
 }
 
 func validateRule(field reflect.Value, fieldName, rule string) error {
-	log.Printf("validating field: %s, rule: %s", fieldName, rule)
+	// log.Printf("validating field: %s, rule: %s", fieldName, rule)
 	switch rule {
 	case "required":
 		if field.IsZero() {

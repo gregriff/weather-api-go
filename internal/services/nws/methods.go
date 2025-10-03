@@ -2,11 +2,11 @@
 package nws
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/gregriff/weather-api-go/internal/v1/schemas"
+	"github.com/gregriff/weather-api-go/internal/validation"
 )
 
 // fetchGridpoints expects string lat and long returned by FormatCoordinates
@@ -28,21 +28,21 @@ func fetchGridpoints(nws *http.Client, latitude, longitude string) (data PointsR
 		return
 	}
 
-	if jsonErr := json.NewDecoder(res.Body).Decode(&data); jsonErr != nil {
-		err = fmt.Errorf("error decoding response body: %w", jsonErr)
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 	return
 }
 
 // GetGridpoints expects string lat and long returned by FormatCoordinates
-func GetGridpoints(nws *http.Client, latitude, longitude string) (schemas.Gridpoints, error) {
+func GetGridpoints(nws *http.Client, latitude, longitude string) (*schemas.Gridpoints, error) {
 	var data = schemas.Gridpoints{}
 
 	res, err := fetchGridpoints(nws, latitude, longitude)
 	if err != nil {
 		err = fmt.Errorf("error fetching gridpoints: %w", err)
-		return data, err
+		return &data, err
 	}
 	gridpointProps := res.Properties
 	locationProps := gridpointProps.RelativeLocation.Properties
@@ -52,12 +52,12 @@ func GetGridpoints(nws *http.Client, latitude, longitude string) (schemas.Gridpo
 	data.Y = &gridpointProps.GridY
 	data.City = locationProps.City
 	data.State = locationProps.State
-	return data, nil
+	return &data, nil
 }
 
 // GetForecast expects string lat and long returned by FormatCoordinates
-func GetForecast(nws *http.Client, latitude, longitude string, gridpoints schemas.Gridpoints) (data schemas.ForecastResponse, err error) {
-	if gridpoints.IsEmpty() {
+func GetForecast(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.ForecastResponse, err error) {
+	if gridpoints == nil {
 		gridpoints, err = GetGridpoints(nws, latitude, longitude)
 		if err != nil {
 			return
@@ -80,13 +80,13 @@ func GetForecast(nws *http.Client, latitude, longitude string, gridpoints schema
 		return
 	}
 
-	if jsonErr := json.NewDecoder(res.Body).Decode(&data); jsonErr != nil {
-		err = fmt.Errorf("error decoding response body: %w", jsonErr)
+	data.Gridpoints = *gridpoints
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 
 	// prepare response
-	data.Gridpoints = gridpoints
 	if newIconNames, ok := SetIconNames(data.Properties.Periods).([]schemas.ForecastPeriod); ok {
 		data.Properties.Periods = newIconNames
 	} else {
@@ -95,8 +95,8 @@ func GetForecast(nws *http.Client, latitude, longitude string, gridpoints schema
 	return
 }
 
-func GetHourlyForecast(nws *http.Client, latitude, longitude string, gridpoints schemas.Gridpoints) (data schemas.HourlyForecastResponse, err error) {
-	if gridpoints.IsEmpty() {
+func GetHourlyForecast(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.HourlyForecastResponse, err error) {
+	if gridpoints == nil {
 		gridpoints, err = GetGridpoints(nws, latitude, longitude)
 		if err != nil {
 			return
@@ -119,8 +119,8 @@ func GetHourlyForecast(nws *http.Client, latitude, longitude string, gridpoints 
 		return
 	}
 
-	if jsonErr := json.NewDecoder(res.Body).Decode(&data); jsonErr != nil {
-		err = fmt.Errorf("error decoding response body: %w", jsonErr)
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 

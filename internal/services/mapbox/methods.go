@@ -2,11 +2,11 @@
 package mapbox
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/gregriff/weather-api-go/internal/config"
+	"github.com/gregriff/weather-api-go/internal/validation"
 )
 
 func ForwardGeocode(mapbox http.Client, searchText string, latitude, longitude *float64) (data ForwardGeocodeResponse, err error) {
@@ -29,8 +29,8 @@ func ForwardGeocode(mapbox http.Client, searchText string, latitude, longitude *
 		err = fmt.Errorf("bad status: %s", res.Status)
 		return
 	}
-	if jsonErr := json.NewDecoder(res.Body).Decode(&data); jsonErr != nil {
-		err = fmt.Errorf("error decoding response body: %w", jsonErr)
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 	return

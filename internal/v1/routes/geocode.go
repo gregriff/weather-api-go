@@ -12,7 +12,7 @@ import (
 
 func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 	query := schemas.GeocodeQueryData{}
-	if err := validation.ValidateAndDecode(r.Body, &query); err != nil {
+	if err := validation.DecodeAndValidate(r.Body, &query); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -50,5 +50,5 @@ func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := schemas.GeocodePlacesResponse{Results: results}
-	WriteJSON(w, data, 200)
+	WriteValidJSON(w, &data, 200)
 }

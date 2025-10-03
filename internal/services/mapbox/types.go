@@ -2,7 +2,7 @@
 package mapbox
 
 type Geometry struct {
-	Type        string    `json:"type" validate:"oneof=Point"`
+	Type        string    `json:"type" validate:"oneOf=Point"`
 	Coordinates []float64 `json:"coordinates" validate:"required"`
 }
 
@@ -39,13 +39,13 @@ type FeatureProperties struct {
 }
 
 type Feature struct {
-	Type       string            `json:"type" validate:"oneof=Feature"`
+	Type       string            `json:"type" validate:"oneOf=Feature"`
 	Id         string            `json:"id" validate:"required"`
 	Geometry   Geometry          `json:"geometry" validate:"required"`
 	Properties FeatureProperties `json:"properties" validate:"required"`
 }
 
 type ForwardGeocodeResponse struct {
-	Type     string    `json:"type" validate:"oneof=FeatureCollection"`
+	Type     string    `json:"type" validate:"oneOf=FeatureCollection"`
 	Features []Feature `json:"features" validate:"required"`
 }
