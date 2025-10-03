@@ -38,8 +38,11 @@ func Run() {
 	handler = middleware.NewCSRFHandler(handler)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", cfg.Api.Host, cfg.Api.Port),
-		Handler: http.TimeoutHandler(handler, 10*time.Second, ""),
+		Addr:              fmt.Sprintf("%s:%d", cfg.Api.Host, cfg.Api.Port),
+		ReadHeaderTimeout: 500 * time.Millisecond,
+		ReadTimeout:       500 * time.Millisecond,
+		IdleTimeout:       500 * time.Millisecond,
+		Handler:           http.TimeoutHandler(handler, 10*time.Second, ""),
 	}
 
 	// graceful shutdown channel
@@ -68,11 +71,11 @@ func Run() {
 }
 
 // createRoutes creates the routing rules for the webserver
-func createRoutes(mux *http.ServeMux, d *routes.RouteHandler) {
+func createRoutes(mux *http.ServeMux, h *routes.RouteHandler) {
 	// mapbox endpoints
-	mux.HandleFunc("POST /v1/geocode/place", d.GeocodePlace)
+	mux.HandleFunc("POST /v1/geocode/place", h.GeocodePlace)
 
 	// nws endpoints
-	mux.HandleFunc("POST /v1/weather/forecast", d.GetForecast)
-	mux.HandleFunc("POST /v1/weather/forecast/hourly", d.GetHourlyForecast)
+	mux.HandleFunc("POST /v1/weather/forecast", h.GetForecast)
+	mux.HandleFunc("POST /v1/weather/forecast/hourly", h.GetHourlyForecast)
 }

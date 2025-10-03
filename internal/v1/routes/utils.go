@@ -9,7 +9,7 @@ import (
 
 // WriteValidJSON validates the data, writing an error to the response if encountered.
 // Otherwise it writes the data as JSON to the response and the status
-func WriteValidJSON(w http.ResponseWriter, data any, status int) {
+func WriteValidJSON(w http.ResponseWriter, data any) {
 	if err := validation.ValidateAndEncode(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

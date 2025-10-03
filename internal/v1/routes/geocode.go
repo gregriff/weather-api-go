@@ -50,5 +50,5 @@ func (h *RouteHandler) GeocodePlace(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := schemas.GeocodePlacesResponse{Results: results}
-	WriteValidJSON(w, &data, 200)
+	WriteValidJSON(w, &data)
 }

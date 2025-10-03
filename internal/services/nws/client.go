@@ -18,6 +18,10 @@ func New() *http.Client {
 		Headers: map[string]string{
 			"User-Agent": fmt.Sprintf("%s, %s", cfg.NWS.UserAgentID, cfg.NWS.UserAgentEmail),
 		},
+		MaxIdleConns:          10,
+		IdleConnTimeout:       30 * time.Second,
+		TLSHandshakeTimeout:   5 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
 	}
 
 	return &http.Client{

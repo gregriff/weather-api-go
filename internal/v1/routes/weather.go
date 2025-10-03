@@ -24,7 +24,7 @@ func (h *RouteHandler) GetForecast(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	WriteValidJSON(w, &res, 200)
+	WriteValidJSON(w, &res)
 }
 
 func (h *RouteHandler) GetHourlyForecast(w http.ResponseWriter, r *http.Request) {
@@ -41,5 +41,5 @@ func (h *RouteHandler) GetHourlyForecast(w http.ResponseWriter, r *http.Request)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	WriteValidJSON(w, &res, 200)
+	WriteValidJSON(w, &res)
 }

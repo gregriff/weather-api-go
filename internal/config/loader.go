@@ -38,8 +38,7 @@ func load() *Config {
 	}()
 
 	var config Config
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&config); err != nil {
+	if err := json.NewDecoder(file).Decode(&config); err != nil {
 		log.Fatalf("Failed to parse config file %s: %v", configFile, err)
 	}
 

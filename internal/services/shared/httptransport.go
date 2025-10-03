@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // Transport allows custom attributes to be added to each HTTP request sent by an http.Client that uses this transport
 type Transport struct {
-	BaseURL string
-	Headers map[string]string
+	BaseURL      string
+	Headers      map[string]string
+	MaxIdleConns int
+	IdleConnTimeout,
+	TLSHandshakeTimeout,
+	ResponseHeaderTimeout time.Duration
 }
 
 // RoundTrip adds upon the normal http.Transport.RoundTrip() behavior to add headers and a base url to each request.
