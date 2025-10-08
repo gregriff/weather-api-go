@@ -2,38 +2,35 @@
 package mapbox
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gregriff/weather-api-go/internal/config"
+	"github.com/gregriff/weather-api-go/internal/validation"
 )
 
-func ForwardGeocode(mapbox http.Client, searchText string, latitude, longitude *float64) (data ForwardGeocodeResponse, httpErr error) {
+func ForwardGeocode(mapbox http.Client, searchText string, latitude, longitude *float64) (data ForwardGeocodeResponse, err error) {
 	cfg := config.Get()
 	url := fmt.Sprintf(ForwardGeocodeURL, searchText, cfg.Mapbox.PublicToken)
 
 	if latitude != nil && longitude != nil {
 		url += fmt.Sprintf("&proximity=%f%%2C%f", *longitude, *latitude)
 	}
-	res, err := mapbox.Get(url)
-	if err != nil {
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
+	res, httpErr := mapbox.Get(url)
+	if httpErr != nil {
+		err = fmt.Errorf("error fetching geocoding data: %w", httpErr)
 		return
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode != http.StatusOK {
-		httpErr = errors.New("Request returned non-200 status")
-		log.Printf("ERROR: %v", httpErr)
+		err = fmt.Errorf("bad status: %s", res.Status)
 		return
 	}
-	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 	return

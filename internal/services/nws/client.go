@@ -1,4 +1,4 @@
-// provides an http.Client for NWS requests
+// package nws provides functionality to communicate with the NWS API: https://api.weather.gov/
 package nws
 
 import (
@@ -10,13 +10,18 @@ import (
 	"github.com/gregriff/weather-api-go/internal/services/shared"
 )
 
-func NewNWSClient() *http.Client {
+// New creates an http.Client for NWS requests
+func New() *http.Client {
 	cfg := config.Get()
 	nwsTransport := shared.Transport{
 		BaseURL: BaseURL,
 		Headers: map[string]string{
 			"User-Agent": fmt.Sprintf("%s, %s", cfg.NWS.UserAgentID, cfg.NWS.UserAgentEmail),
 		},
+		MaxIdleConns:          10,
+		IdleConnTimeout:       30 * time.Second,
+		TLSHandshakeTimeout:   5 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
 	}
 
 	return &http.Client{

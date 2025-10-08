@@ -2,101 +2,91 @@
 package nws
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gregriff/weather-api-go/internal/v1/schemas"
+	"github.com/gregriff/weather-api-go/internal/validation"
 )
 
-// GetGridpointsRaw expects string lat and long returned by FormatCoordinates
-func GetGridpointsRaw(nws *http.Client, latitude, longitude string) (data PointsResponse, httpErr error) {
+// fetchGridpoints expects string lat and long returned by FormatCoordinates
+func fetchGridpoints(nws *http.Client, latitude, longitude string) (data PointsResponse, err error) {
+	var res *http.Response
+
 	url := fmt.Sprintf(PointsURL, latitude, longitude)
-	res, err := nws.Get(url)
+	res, err = nws.Get(url)
 	if err != nil {
-		log.Printf("res: %#v", res)
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
+		err = fmt.Errorf("error during request: %w", err)
 		return
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if statusCode := res.StatusCode; statusCode != http.StatusOK {
-		if statusCode == 400 {
-			httpErr = errors.New("GET /gridpoints failed with 400")
-			log.Printf("ERROR: %v", httpErr)
-			return
-		}
-		httpErr = errors.New("GET /gridpoints returned non-200 status")
-		log.Printf("ERROR: %v", httpErr)
+		err = fmt.Errorf("bad status: %d", statusCode)
 		return
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-		httpErr = errors.New("Json parse failed")
-		log.Printf("ERROR: %v", httpErr)
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 	return
 }
 
 // GetGridpoints expects string lat and long returned by FormatCoordinates
-func GetGridpoints(nws *http.Client, latitude, longitude string) (data *schemas.Gridpoints, httpErr error) {
-	res, err := GetGridpointsRaw(nws, latitude, longitude)
+func GetGridpoints(nws *http.Client, latitude, longitude string) (*schemas.Gridpoints, error) {
+	var data = schemas.Gridpoints{}
+
+	res, err := fetchGridpoints(nws, latitude, longitude)
 	if err != nil {
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
-		return
+		err = fmt.Errorf("error fetching gridpoints: %w", err)
+		return &data, err
 	}
 	gridpointProps := res.Properties
 	locationProps := gridpointProps.RelativeLocation.Properties
 
-	// TODO: ensure compiler is dereferencing properly here
-	data = &schemas.Gridpoints{}
 	data.Office = gridpointProps.Cwa
-	data.X = gridpointProps.GridX
-	data.Y = gridpointProps.GridY
+	data.X = &gridpointProps.GridX
+	data.Y = &gridpointProps.GridY
 	data.City = locationProps.City
 	data.State = locationProps.State
-	return
+	return &data, nil
 }
 
-// GetForecastRaw expects string lat and long returned by FormatCoordinates
-func GetForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.ForecastResponse, httpErr error) {
-	if gridpoints == nil || gridpoints.IsEmpty() {
-		gridpoints, httpErr = GetGridpoints(nws, latitude, longitude)
-		if httpErr != nil {
-			log.Printf("ERROR: %v", httpErr)
+// GetForecast expects string lat and long returned by FormatCoordinates
+func GetForecast(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.ForecastResponse, err error) {
+	if gridpoints == nil {
+		gridpoints, err = GetGridpoints(nws, latitude, longitude)
+		if err != nil {
 			return
 		}
 	}
 
-	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, gridpoints.X, gridpoints.Y)
+	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, *gridpoints.X, *gridpoints.Y)
 	url := fmt.Sprintf(ForecastURL, urlParams)
-	res, err := nws.Get(url)
-	if err != nil {
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
+	res, httpErr := nws.Get(url)
+	if httpErr != nil {
+		err = fmt.Errorf("error fetching forecast: %w", httpErr)
 		return
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode != http.StatusOK {
-		httpErr = fmt.Errorf("Request returned non-200 status: %s", res.Status)
-		log.Printf("ERROR: %v", httpErr)
+		err = fmt.Errorf("bad status: %s", res.Status)
 		return
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
+	data.Gridpoints = *gridpoints
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 
 	// prepare response
-	data.Gridpoints = *gridpoints
 	if newIconNames, ok := SetIconNames(data.Properties.Periods).([]schemas.ForecastPeriod); ok {
 		data.Properties.Periods = newIconNames
 	} else {
@@ -105,34 +95,32 @@ func GetForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *sc
 	return
 }
 
-func GetHourlyForecastRaw(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.HourlyForecastResponse, httpErr error) {
-	if gridpoints == nil || gridpoints.IsEmpty() {
-		gridpoints, httpErr = GetGridpoints(nws, latitude, longitude)
-		if httpErr != nil {
-			log.Printf("ERROR: %v", httpErr)
+func GetHourlyForecast(nws *http.Client, latitude, longitude string, gridpoints *schemas.Gridpoints) (data schemas.HourlyForecastResponse, err error) {
+	if gridpoints == nil {
+		gridpoints, err = GetGridpoints(nws, latitude, longitude)
+		if err != nil {
 			return
 		}
 	}
 
-	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, gridpoints.X, gridpoints.Y)
+	urlParams := fmt.Sprintf(GridpointURLParams, gridpoints.Office, *gridpoints.X, *gridpoints.Y)
 	url := fmt.Sprintf(HourlyForecastURL, urlParams)
-	res, err := nws.Get(url)
-	if err != nil {
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
+	res, httpErr := nws.Get(url)
+	if httpErr != nil {
+		err = fmt.Errorf("error fetching hourly forecast: %w", httpErr)
 		return
 	}
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode != http.StatusOK {
-		httpErr = errors.New("Request returned non-200 status")
-		log.Printf("ERROR: %v", httpErr)
+		err = fmt.Errorf("bad status: %s", res.Status)
 		return
 	}
 
-	if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-		httpErr = err
-		log.Printf("ERROR: %v", httpErr)
+	if vErr := validation.DecodeAndValidate(res.Body, &data); vErr != nil {
+		err = fmt.Errorf("error validating response: %w", vErr)
 		return
 	}
 

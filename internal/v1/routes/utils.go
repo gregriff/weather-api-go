@@ -2,13 +2,17 @@
 package routes
 
 import (
-	"encoding/json"
 	"net/http"
+
+	"github.com/gregriff/weather-api-go/internal/validation"
 )
 
-// WriteJSON writes JSON to a response, and a status code to the header
-func WriteJSON(w http.ResponseWriter, data any, status int) {
+// WriteValidJSON validates the data, writing an error to the response if encountered.
+// Otherwise it writes the data as JSON to the response and the status
+func WriteValidJSON(w http.ResponseWriter, data any) {
+	if err := validation.ValidateAndEncode(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
 }

@@ -1,3 +1,4 @@
+// package routes contains the exposed API endpoints
 package routes
 
 import (
@@ -24,7 +25,7 @@ func NewRouteHandler() *RouteHandler {
 	return &RouteHandler{
 		// db:        db,  (*sql.DB)
 		// validator: validators.New(),
-		MapboxClient: mapbox.NewMapboxClient(),
-		NWSClient:    nws.NewNWSClient(),
+		MapboxClient: mapbox.New(),
+		NWSClient:    nws.New(),
 	}
 }

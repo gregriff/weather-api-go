@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,33 +38,44 @@ func Run() {
 	handler = middleware.NewCSRFHandler(handler)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", cfg.Api.Host, cfg.Api.Port),
-		Handler: handler,
+		Addr:              fmt.Sprintf("%s:%d", cfg.Api.Host, cfg.Api.Port),
+		ReadHeaderTimeout: 500 * time.Millisecond,
+		ReadTimeout:       500 * time.Millisecond,
+		IdleTimeout:       500 * time.Millisecond,
+		Handler:           http.TimeoutHandler(handler, 10*time.Second, ""),
 	}
 
-	// Graceful shutdown
-	go func() {
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-		<-sigChan
+	// graceful shutdown channel
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		server.Shutdown(ctx)
+	// run server
+	go func() {
+		log.Printf("Starting server on %s", server.Addr)
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("http server error: %v", err)
+		}
+		log.Println("Stopped serving new connections.")
 	}()
 
-	log.Printf("Starting server on %s", server.Addr)
-	log.Fatal(server.ListenAndServe())
+	// recieve stop signals
+	<-sigChan
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("http shutdown error: %v", err)
+	}
+	log.Println("Graceful shutdown complete.")
 }
 
 // createRoutes creates the routing rules for the webserver
-func createRoutes(mux *http.ServeMux, d *routes.RouteHandler) {
+func createRoutes(mux *http.ServeMux, h *routes.RouteHandler) {
 	// mapbox endpoints
-	mux.HandleFunc("POST /v1/geocode/place", d.GeocodePlace)
+	mux.HandleFunc("POST /v1/geocode/place", h.GeocodePlace)
 
 	// nws endpoints
-	mux.HandleFunc("GET /v1/weather", d.TestForecast)
-	mux.HandleFunc("GET /v1/weather/gridpoints", d.TestGridpoints)
-	mux.HandleFunc("POST /v1/weather/forecast", d.GetForecast)
-	mux.HandleFunc("POST /v1/weather/forecast/hourly", d.GetHourlyForecast)
+	mux.HandleFunc("POST /v1/weather/forecast", h.GetForecast)
+	mux.HandleFunc("POST /v1/weather/forecast/hourly", h.GetHourlyForecast)
 }
